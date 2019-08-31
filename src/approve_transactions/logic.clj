@@ -12,7 +12,12 @@
    :denied-reasons denied-reasons})
 
 (defn can-transaction-be-authorized? [account transaction last-transactions]
-  (transaction-authorization-output true 900.00 []))
+  (let [amount (get transaction :amount)
+        merchant (get transaction :merchant)
+        denied-reasons []]
+    (transaction-authorization-output (empty? denied-reasons) 
+                                      (calculate-new-limit account amount) 
+                                      denied-reasons)))
 
 (defn calculate-new-limit [account amount]
   (- (get account :limit) amount))
