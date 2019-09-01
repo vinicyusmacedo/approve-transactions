@@ -2,7 +2,7 @@
   (:require [compojure.api.sweet :refer :all]
             [ring.util.http-response :refer :all]
             [schema.core :as s]
-            [approve-transactions.logic :as logic]))
+            [approve-transactions.controller :as controller]))
 
 (s/defschema Pizza
   {:name s/Str
@@ -31,12 +31,6 @@
    :new-limit      s/Num
    :denied-reasons [s/Str]})
 
-; TODO - move to controller
-(defn check-transaction [check-transaction-request]
-  (logic/can-transaction-be-authorized? (:account check-transaction-request)
-                                  (:transaction check-transaction-request)
-                                  (:last-transactions check-transaction-request)))
-
 (def app
   (api
     {:swagger
@@ -58,4 +52,6 @@
         :return CheckTransactionResponse 
         :body [check-transaction-request CheckTransactionRequest]
         :summary "check if transaction is approved following some rules"
-        (ok (check-transaction check-transaction-request))))))
+        (ok (controller/check-transaction (:account check-transaction-request)
+                                          (:transaction check-transaction-request)
+                                          (:last-transactions check-transaction-request)))))))
