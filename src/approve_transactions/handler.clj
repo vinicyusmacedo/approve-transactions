@@ -1,5 +1,6 @@
 (ns approve-transactions.handler
   (:require [compojure.api.sweet :refer :all]
+            [org.httpkit.server :as httpkit]
             [ring.util.http-response :refer :all]
             [approve-transactions.controller :as controller]
             [approve-transactions.schema :refer :all]))
@@ -28,3 +29,12 @@
                     :description "An api that checks if a transaction can be approved."}
              :tags [{:name "api"}]}}}
     (app-routes)))
+
+(defn start-server! [port]
+  (httpkit/run-server
+    app
+    {:port (read-string port)})
+  (println (str "server started on http://localhost:" port)))
+
+(defn -main [port]
+  (start-server! port))

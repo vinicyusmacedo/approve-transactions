@@ -5,8 +5,10 @@
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [clj-time "0.15.2"]
+                 [http-kit "2.3.0"]
                  [metosin/compojure-api "2.0.0-alpha30"]]
   :ring {:handler approve-transactions.handler/app}
+  :main approve-transactions.handler
   :plugins [[lein-midje "3.2.1"]
             [lein-ring "0.12.5"]]
   :profiles {:dev {:dependencies [[midje "1.9.9"]
