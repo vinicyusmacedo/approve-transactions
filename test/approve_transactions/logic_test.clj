@@ -15,8 +15,8 @@
                          :denylist       []})
 
 (def transaction {:merchant "Stores Ltd."
-                        :amount   100.00
-                        :time     "2019-08-25T10:00:00.00Z"})
+                  :amount   100.00
+                  :time     "2019-08-25T10:00:00.00Z"})
 
 (def transaction-above-limit {:merchant "Stores Ltd."
                               :amount   1000.01
@@ -75,9 +75,10 @@
   (logic/is-above-merchant-threshold? "Stores Ltd." (repeat 9 transaction)) => false)
 
 (fact "Rate limit exceeded"
-  (logic/is-rate-limit-exceeded? last-transactions ))
+  (logic/is-rate-limit-exceeded? last-transactions-rate-limit "2019-08-25T10:01:59.00Z") => true)
 
-(fact "Rate limit not exceeded")
+(fact "Rate limit not exceeded"
+  (logic/is-rate-limit-exceeded? last-transactions-rate-limit "2019-08-25T10:02:00.00Z") => false)
 
 (fact "Merchant in denylist"
   (logic/is-merchant-in-denylist? "Stores Ltd." account-with-denylist) => true)

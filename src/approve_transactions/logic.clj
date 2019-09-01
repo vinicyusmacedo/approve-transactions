@@ -1,10 +1,15 @@
 (ns approve-transactions.logic)
 
+(require '[clj-time.core :as time-core]
+         '[clj-time.format :as time-format])
+
 (def ^:const merchant-threshold 10)
 
 (def ^:const first-transaction-percentage 0.10)
 
 (def ^:const rate-limit-mins 2)
+
+(def ^:const rate-limit-transactions 3)
 
 (defn transaction-authorization-output [approved new-limit denied-reasons]
   {:approved approved
@@ -42,7 +47,11 @@
   (>= (count (filter #(= (:merchant %) merchant) last-transactions)) merchant-threshold))
 
 (defn is-rate-limit-exceeded? [last-transactions timestamp]
-  true)
+  (if-let [limit-transaction (nth last-transactions (- rate-limit-transactions 1) nil)]
+    (let [limit-transaction-start (time-format/parse (get limit-transaction :time))
+          limit-transaction-end (time-core/plus limit-transaction-start (time-core/minutes rate-limit-mins))
+          current-time (time-format/parse timestamp)]
+      (time-core/within? (time-core/interval limit-transaction-start limit-transaction-end) current-time))))
 
 (defn is-merchant-in-denylist? [merchant account]
   (boolean (some #(= merchant %) (get account :denylist))))
