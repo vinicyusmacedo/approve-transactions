@@ -46,8 +46,11 @@
 (defn is-above-merchant-threshold? [merchant last-transactions]
   (>= (count (filter #(= (:merchant %) merchant) last-transactions)) merchant-threshold))
 
+(defn sort-last-transactions-by-time [last-transactions]
+  (sort-by :time #(compare %2 %1) last-transactions))
+
 (defn is-rate-limit-exceeded? [last-transactions timestamp]
-  (if-let [limit-transaction (nth last-transactions (- rate-limit-transactions 1) nil)]
+  (if-let [limit-transaction (nth (sort-last-transactions-by-time last-transactions) (- rate-limit-transactions 1) nil)]
     (let [limit-transaction-start (time-format/parse (get limit-transaction :time))
           limit-transaction-end (time-core/plus limit-transaction-start (time-core/minutes rate-limit-mins))
           current-time (time-format/parse timestamp)]

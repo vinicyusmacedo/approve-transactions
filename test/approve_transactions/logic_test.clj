@@ -42,7 +42,7 @@
   (logic/is-first-transaction? []) => true)
 
 (fact "Not the first transaction"
-  (logic/is-first-transaction? (repeat 2 last-transaction)) => false)
+  (logic/is-first-transaction? (repeat 2 last-transactions)) => false)
 
 (fact "Below account limit"
   (logic/is-above-limit? account 1000.00) => false)
@@ -73,6 +73,10 @@
 
 (fact "Merchant below threshold of transactions"
   (logic/is-above-merchant-threshold? "Stores Ltd." (repeat 9 transaction)) => false)
+
+(fact "Sorted last transactions by time"
+  (logic/sort-last-transactions-by-time [{:time "2019-08-25T10:00:00.00Z"} {:time "2019-08-25T10:02:00.00Z"}]) => [{:time "2019-08-25T10:02:00.00Z"}
+                                                                                                                   {:time "2019-08-25T10:00:00.00Z"}])
 
 (fact "Rate limit exceeded"
   (logic/is-rate-limit-exceeded? last-transactions-rate-limit "2019-08-25T10:01:59.00Z") => true)
@@ -126,5 +130,4 @@
                                                                                                               :new-limit 1000.00
                                                                                                               :denied-reasons ["card blocked"
                                                                                                                                "transaction above limit for first transaction"
-                                                                                                                               "merchant in denylist"
-                                                                                                                               "transaction rate limit exceeded"]}))
+                                                                                                                               "merchant in denylist"]}))
