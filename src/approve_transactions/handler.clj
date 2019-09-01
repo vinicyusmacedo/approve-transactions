@@ -1,7 +1,8 @@
 (ns approve-transactions.handler
   (:require [compojure.api.sweet :refer :all]
             [ring.util.http-response :refer :all]
-            [schema.core :as s]))
+            [schema.core :as s]
+            [approve-transactions.logic :as logic]))
 
 (s/defschema Pizza
   {:name s/Str
@@ -30,19 +31,20 @@
    :new-limit      s/Num
    :denied-reasons [s/Str]})
 
+; TODO - move to controller
 (defn check-transaction [check-transaction-request]
-  {:approved true
-   :new-limit 900.00
-   :denied-reasons []})
+  (logic/can-transaction-be-authorized? (:account check-transaction-request)
+                                  (:transaction check-transaction-request)
+                                  (:last-transactions check-transaction-request)))
 
 (def app
   (api
     {:swagger
      {:ui "/"
       :spec "/swagger.json"
-      :data {:info {:title "My-api"
-                    :description "Compojure Api example"}
-             :tags [{:name "api", :description "some apis"}]}}}
+      :data {:info {:title "Approve Transactions API"
+                    :description "An api that checks if a transaction can be approved."}
+             :tags [{:name "api"}]}}}
 
     (context "/api" []
       :tags ["api"]
