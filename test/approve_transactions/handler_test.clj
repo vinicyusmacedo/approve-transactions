@@ -8,7 +8,7 @@
   (cheshire/parse-string (slurp body) true))
 
 (fact "Test healthcheck"
-  (let [response (app (-> (mock/request :get "/api/healthcheck")))
+  (let [response (app (-> (mock/request :get "/healthcheck")))
         body     (parse-body (:body response))]
     (:status response) => 200
     (:msg body) => "ok"))
@@ -30,10 +30,9 @@
    :denied-reasons []})
 
 (fact "Test check transaction"
-  (let [response (app (-> (mock/request :post "/api/check-transaction")
+  (let [response (app (-> (mock/request :post "/check-transaction")
                           (mock/content-type "application/json")
                           (mock/body (cheshire/generate-string test-payload))))
         body     (parse-body (:body response))]
-    response
     (:status response) => 200
     body => test-payload-response))
