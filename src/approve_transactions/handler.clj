@@ -30,11 +30,9 @@
              :tags [{:name "api"}]}}}
     (app-routes)))
 
-(defn start-server! [port]
-  (httpkit/run-server
-    app
-    {:port (read-string port)})
-  (println (str "server started on http://localhost:" port)))
+(defn start-server! [config]
+  (httpkit/run-server app config)
+  (println (str "server started on http://localhost:" (:port config))))
 
 (defn -main [port]
-  (start-server! port))
+  (start-server! {:port (read-string port)}))
