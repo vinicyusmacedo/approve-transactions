@@ -4,17 +4,12 @@ A Clojure library designed to ... well, that part is up to you.
 
 ## Usage
 
-## License
+### Docker
 
-Copyright © 2019 FIXME
+You can automatically build and push a Docker image by running `TAG=registry.io/exaple:tag make docker`.
 
-This program and the accompanying materials are made available under the
-terms of the Eclipse Public License 2.0 which is available at
-http://www.eclipse.org/legal/epl-2.0.
+To build a Docker image, just run `make docker-build`. This will build an image and tag it as `approve-transactions:latest`. To tag it with other version, run `TAG=approve-transactions/example make docker-build`.
 
-This Source Code may also be made available under the following Secondary
-Licenses when the conditions for such availability set forth in the Eclipse
-Public License, v. 2.0 are satisfied: GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or (at your
-option) any later version, with the GNU Classpath Exception which is available
-at https://www.gnu.org/software/classpath/license.html.
+To run it, use `make docker-run` and to specify a port, `PORT=5000 make docker-run`. You can also supply a variable `TAG` to run another docker image.
+
+To tag it again, use `TAG=old-tag:example NEWTAG=new-tag:example make docker-tag`. To push if, run `TAG=tag:example make docker-push`
