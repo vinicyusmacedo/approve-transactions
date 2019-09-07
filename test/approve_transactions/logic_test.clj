@@ -100,11 +100,11 @@
 
 (fact "Should return transaction-rules accordingly"
   (logic/transaction-rules account transaction last-transactions) => [["card blocked" logic/is-card-blocked? account]
-                                                                      ["transaction above limit" logic/is-above-limit? account (get transaction :amount)]
-                                                                      ["transaction above limit for first transaction" logic/is-above-limit-for-first-transaction? account last-transactions (get transaction :amount)]
-                                                                      ["merchant in denylist" logic/is-merchant-in-denylist? (get transaction :merchant) account]
+                                                                      ["transaction above limit" logic/is-above-limit? account (:amount transaction)]
+                                                                      ["transaction above limit for first transaction" logic/is-above-limit-for-first-transaction? account last-transactions (:amount transaction)]
+                                                                      ["merchant in denylist" logic/is-merchant-in-denylist? (:merchant transaction) account]
                                                                       ["merchant limit exceeded" logic/is-above-merchant-threshold? (get transaction :merchant) last-transactions]
-                                                                      ["transaction rate limit exceeded" logic/is-rate-limit-exceeded? last-transactions (get transaction :time)]])
+                                                                      ["transaction rate limit exceeded" logic/is-rate-limit-exceeded? last-transactions (:time transaction)]])
 
 (fact "Complete output for transaction authorization"
   (logic/transaction-authorization-output false 1000.00 ["deny reason 1"

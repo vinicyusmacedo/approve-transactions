@@ -1,3 +1,4 @@
+.PHONY: test
 run:
 	lein run 3000
 
