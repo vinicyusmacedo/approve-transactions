@@ -5,6 +5,7 @@
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [clj-time "0.15.2"]
+                 [com.stuartsierra/component "0.4.0"]
                  [http-kit "2.3.0"]
                  [metosin/compojure-api "2.0.0-alpha30"]]
   :ring {:handler approve-transactions.handler/app}

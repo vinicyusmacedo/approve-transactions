@@ -1,6 +1,7 @@
 (ns approve-transactions.handler
   (:require [compojure.api.sweet :refer :all]
             [org.httpkit.server :as httpkit]
+            [com.stuartsierra.component :as component]
             [ring.util.http-response :refer :all]
             [approve-transactions.controller :as controller]
             [approve-transactions.schema :refer :all]))
@@ -30,11 +31,26 @@
              :tags [{:name "api"}]}}}
     (app-routes)))
 
-(defn start-server! [port]
+(defn start-server [port]
   (httpkit/run-server
     app
-    {:port (read-string port)})
-  (println (str "server started on http://localhost:" port)))
+    {:port (read-string port)}))
+
+(defrecord HTTPServer [port]
+  component/Lifecycle
+  
+  (start [component]
+    (println "creating server")
+    (assoc component :server (start-server port)))
+  (stop [component]
+    (println "Stopping server")))
+
+(defn new-server [port]
+  (map->HTTPServer {:port port}))
+
+(defn system-map [config]
+  (component/system-map
+    :http (new-server (:port config))))
 
 (defn -main [port]
-  (start-server! port))
+  (component/start (system-map {:port port})))
