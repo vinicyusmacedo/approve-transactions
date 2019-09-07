@@ -43,7 +43,8 @@
     (println "creating server")
     (assoc component :server (start-server port)))
   (stop [component]
-    (println "Stopping server")))
+    (println "Stopping server")
+    (assoc component :server nil)))
 
 (defn new-server [port]
   (map->HTTPServer {:port port}))
