@@ -8,8 +8,8 @@
                  [com.stuartsierra/component "0.4.0"]
                  [http-kit "2.3.0"]
                  [metosin/compojure-api "2.0.0-alpha30"]]
-  :ring {:handler approve-transactions.handler/app}
-  :main approve-transactions.handler
+  :ring {:handler approve-transactions.server/app}
+  :main approve-transactions.main
   :plugins [[lein-midje "3.2.1"]
             [lein-ring "0.12.5"]]
   :profiles {:dev {:dependencies [[midje "1.9.9"]
