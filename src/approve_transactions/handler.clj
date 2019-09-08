@@ -1,6 +1,7 @@
 (ns approve-transactions.handler
   (:require [compojure.api.sweet :refer :all]
             [org.httpkit.server :as httpkit]
+            [clojure.tools.logging :as log]
             [ring.util.http-response :refer :all]
             [approve-transactions.controller :as controller]
             [approve-transactions.schema :refer :all]))
@@ -32,4 +33,4 @@
 
 (defn start-server [config]
   (httpkit/run-server app config)
-  (printf "server started on http://%s:%s" (:ip config) (:port config)))
+  (log/info (str "server started on http://" (:ip config) ":" (:port config))))
