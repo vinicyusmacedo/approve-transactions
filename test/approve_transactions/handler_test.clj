@@ -15,19 +15,19 @@
 
 (def test-payload
   {:account {
-     :card-is-active true
+     :cardIsActive true
      :limit 1000.00
      :denylist []}
    :transaction {
      :merchant "Stores Ltd."
      :amount 100.00
      :time "2019-08-25T10:00:00.00Z"}
-   :last-transactions []})
+   :lastTransactions []})
 
 (def test-payload-response
   {:approved true
-   :new-limit 900.00
-   :denied-reasons []})
+   :newLimit 900.00
+   :deniedReasons []})
 
 (fact "Test check transaction"
   (let [response (app (-> (mock/request :post "/check-transaction")
