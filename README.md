@@ -23,7 +23,8 @@ The API accepts three schemas: `account`, `transaction` and `lastTransactions` (
     "time": String
   },
   "lastTransactions": [transaction]
-}```
+}
+```
 
 It should return a payload on this format:
 
