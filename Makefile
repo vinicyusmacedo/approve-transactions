@@ -1,10 +1,15 @@
+ifndef TAG
 TAG=approve-transactions/latest
+endif
+
+ifndef PORT
 PORT=3000
+endif
 
 .PHONY: test
 
 run:
-	lein run 3000
+	lein run ${PORT}
 
 test:
 	lein midje :autotest

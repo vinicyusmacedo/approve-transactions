@@ -1,4 +1,4 @@
-FROM clojure
+FROM clojure:openjdk-8-lein-alpine
 COPY . /usr/src/app
 WORKDIR /usr/src/app
 RUN ["lein", "uberjar"]
