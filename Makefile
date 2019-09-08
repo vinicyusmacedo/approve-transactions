@@ -9,7 +9,7 @@ endif
 .PHONY: test
 
 run:
-	lein run ${PORT}
+	PORT=${PORT} lein run
 
 test:
 	lein midje :autotest
@@ -23,7 +23,7 @@ docker-build:
 	docker build . -t ${TAG}
 
 docker-run:
-	docker run -p ${PORT}:${PORT} ${TAG}
+	docker run -p ${PORT}:${PORT} -e PORT=${PORT} ${TAG}
 
 docker-tag:
 	docker tag ${TAG} ${NEWTAG}

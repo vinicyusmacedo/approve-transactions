@@ -2,6 +2,6 @@
   (:gen-class)
   (:require [approve-transactions.handler :as handler]))
 
-(defn -main [port]
-  (handler/start-server {:port (read-string port)
+(defn -main []
+  (handler/start-server {:port (or (read-string (System/getenv "PORT")) 3000)
                          :ip "0.0.0.0"}))
