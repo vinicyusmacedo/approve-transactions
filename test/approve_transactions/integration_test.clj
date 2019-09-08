@@ -10,7 +10,7 @@
 (defn make-request [account transaction last-transactions]
   (let [test-payload {:account account
                       :transaction transaction
-                      :last-transactions last-transactions}]
+                      :lastTransactions last-transactions}]
     (app (-> (mock/request :post "/check-transaction")
              (mock/content-type "application/json")
              (mock/body (cheshire/generate-string test-payload))))))
@@ -35,12 +35,12 @@
                                                     "transaction rate limit exceeded"])
 
 (def ok-account
-  {:card-is-active true
+  {:cardIsActive true
    :limit 1000.00
    :denylist []})
 
 (def bad-account
-  {:card-is-active false
+  {:cardIsActive false
    :limit 1000.00
    :denylist ["Not Stores Ltd."]})
 
@@ -73,45 +73,45 @@
         body     (parse-body (:body response))]
     (:status response) => 200
     body => {:approved true
-             :new-limit 900.00
-             :denied-reasons []}))
+             :newLimit 900.00
+             :deniedReasons []}))
 
 (fact "Test ok first transaction"
   (let [response (make-request ok-account ok-transaction [])
         body     (parse-body (:body response))]
     (:status response) => 200
     body => {:approved true
-             :new-limit 900.00
-             :denied-reasons []}))
+             :newLimit 900.00
+             :deniedReasons []}))
 
 (fact "Test bad first transaction"
   (let [response (make-request bad-account bad-first-transaction [])
         body     (parse-body (:body response))]
     (:status response) => 200
     body => {:approved false
-             :new-limit 1000.00
-             :denied-reasons first-transaction-denied-reasons}))
+             :newLimit 1000.00
+             :deniedReasons first-transaction-denied-reasons}))
 
 (fact "Test bad transaction"
   (let [response (make-request bad-account bad-transaction (repeat 1 bad-transaction))
         body     (parse-body (:body response))]
     (:status response) => 200
     body => {:approved false
-             :new-limit 1000.00
-             :denied-reasons bad-transaction-denied-reasons}))
+             :newLimit 1000.00
+             :deniedReasons bad-transaction-denied-reasons}))
 
 (fact "Test bad transaction - hit rate limit"
   (let [response (make-request bad-account bad-transaction bad-last-transactions-rate-limit)
         body     (parse-body (:body response))]
     (:status response) => 200
     body => {:approved false
-             :new-limit 1000.00
-             :denied-reasons bad-transaction-rate-limit-denied-reasons}))
+             :newLimit 1000.00
+             :deniedReasons bad-transaction-rate-limit-denied-reasons}))
 
 (fact "Test bad transaction - hit rate limit and merchant limit"
   (let [response (make-request bad-account bad-transaction bad-last-transactions-merchant-limit)
         body     (parse-body (:body response))]
     (:status response) => 200
     body => {:approved false
-             :new-limit 1000.00
-             :denied-reasons bad-transaction-merchant-limit-denied-reasons}))
+             :newLimit 1000.00
+             :deniedReasons bad-transaction-merchant-limit-denied-reasons}))

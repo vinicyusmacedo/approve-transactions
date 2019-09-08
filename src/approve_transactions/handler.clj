@@ -1,6 +1,8 @@
 (ns approve-transactions.handler
   (:require [compojure.api.sweet :refer :all]
             [org.httpkit.server :as httpkit]
+            [muuntaja.core :as muuntaja]
+            [camel-snake-kebab.core :as csk]
             [clojure.tools.logging :as log]
             [ring.util.http-response :refer :all]
             [approve-transactions.controller :as controller]
@@ -24,11 +26,15 @@
 (def app
   (api
     {:swagger
-     {:ui "/"
-      :spec "/swagger.json"
-      :data {:info {:title "Approve Transactions API"
-                    :description "An api that checks if a transaction can be approved."}
-             :tags [{:name "api"}]}}}
+      {:ui "/"
+       :spec "/swagger.json"
+       :data {:info {:title "Approve Transactions API"
+                     :description "An api that checks if a transaction can be approved."}
+                     :tags [{:name "api"}]}}
+     :formats (update-in muuntaja/default-options
+                         [:formats "application/json"]
+                         merge {:decoder-opts {:decode-key-fn #(keyword (csk/->kebab-case %))}
+                                :encoder-opts {:encode-key-fn #(csk/->camelCase (if (keyword? %) (name %) %))}})}
     (app-routes)))
 
 (defn start-server [config]

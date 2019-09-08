@@ -3,6 +3,8 @@
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [clj-time "0.15.2"]
                  [org.clojure/tools.logging "0.5.0"]
+                 [metosin/muuntaja "0.6.4"]
+                 [camel-snake-kebab "0.4.0"]
                  [http-kit "2.3.0"]
                  [metosin/compojure-api "2.0.0-alpha30"]]
   :main approve-transactions.main
