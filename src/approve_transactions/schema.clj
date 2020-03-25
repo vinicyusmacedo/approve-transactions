@@ -4,6 +4,7 @@
 (s/defschema Account
   {:card-is-active s/Bool
    :limit          s/Num
+   :allow-listed   s/Bool
    :denylist       [s/Str]})
 
 (s/defschema Transaction

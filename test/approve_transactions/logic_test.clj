@@ -4,15 +4,43 @@
 
 (def account {:card-is-active true
               :limit          1000.00
+              :allow-listed   false
               :denylist       []})
 
 (def account-with-denylist {:card-is-active false
                             :limit          1000.00
+                            :allow-listed   false
                             :denylist       ["Stores Ltd."]})
+
+(def account-with-denylist-card-active {:card-is-active true
+                                        :limit          1000.00
+                                        :allow-listed   false
+                                        :denylist       ["Stores Ltd."]})
 
 (def account-not-active {:card-is-active false
                          :limit          1000.00
+                         :allow-listed   false
                          :denylist       []})
+
+(def account-allow-listed {:card-is-active true
+                           :limit          1000.00
+                           :allow-listed   true
+                           :denylist       []})
+
+(def account-with-denylist-allow-listed {:card-is-active false
+                                         :limit          1000.00
+                                         :allow-listed   true
+                                         :denylist       ["Stores Ltd."]})
+
+(def account-with-denylist-card-active-allow-listed {:card-is-active true
+                                                     :limit          1000.00
+                                                     :allow-listed   true
+                                                     :denylist       ["Stores Ltd."]})
+
+(def account-not-active-allow-listed {:card-is-active false
+                                      :limit          1000.00
+                                      :allow-listed   true
+                                      :denylist       []})
 
 (def transaction {:merchant "Stores Ltd."
                   :amount   100.00
@@ -95,6 +123,9 @@
 (fact "A new limit is calculated"
   (logic/calculate-new-limit account 100.00) => 900.00)
 
+(fact "A new limit is calculated - with precision of 2 decimal places"
+  (logic/calculate-new-limit account 900.01) => (roughly 99.99))
+
 (fact "Should eval a is-first-transaction? function"
   (logic/eval-rule "first transaction" logic/is-first-transaction? []) => "first transaction")
 
@@ -106,21 +137,28 @@
                                                                       ["merchant limit exceeded" logic/is-above-merchant-threshold? (get transaction :merchant) last-transactions]
                                                                       ["transaction rate limit exceeded" logic/is-rate-limit-exceeded? last-transactions (:time transaction)]])
 
+(fact "Should return allow-listed transaction-rules accordingly"
+  (logic/transaction-rules-allow-listed account transaction last-transactions) => [["card blocked" logic/is-card-blocked? account]
+                                                                                   ["transaction above limit" logic/is-above-limit? account (:amount transaction)]])
+
 (fact "Complete output for transaction authorization"
-  (logic/transaction-authorization-output false 1000.00 ["deny reason 1"
-                                                         "deny reason 2"]) => (just {:approved false
-                                                                                     :new-limit 1000.00
-                                                                                     :denied-reasons ["deny reason 1"
-                                                                                                      "deny reason 2"]}))
+      (logic/transaction-authorization-output false 1000.00 ["deny reason 1"
+                                                             "deny reason 2"] false) => (just {:approved false
+                                                                                               :new-limit 1000.00
+                                                                                               :allow-listed false
+                                                                                               :denied-reasons ["deny reason 1"
+                                                                                                                "deny reason 2"]}))
 
 (fact "An approved transaction (all good)"
   (logic/can-transaction-be-authorized? account transaction last-transactions) => (just {:approved true
                                                                                          :new-limit 900.00
+                                                                                         :allow-listed false
                                                                                          :denied-reasons []}))
 
 (fact "A not-approved transaction"
   (logic/can-transaction-be-authorized? account-with-denylist transaction-above-limit last-transactions-merchant-limit) => (just {:approved false
                                                                                                                                   :new-limit 1000.00
+                                                                                                                                  :allow-listed false
                                                                                                                                   :denied-reasons ["card blocked"
                                                                                                                                                    "transaction above limit"
                                                                                                                                                    "merchant in denylist"
@@ -130,6 +168,26 @@
 (fact "A not-approved first transaction"
   (logic/can-transaction-be-authorized? account-with-denylist transaction-above-90percent-limit []) => (just {:approved false
                                                                                                               :new-limit 1000.00
+                                                                                                              :allow-listed false
                                                                                                               :denied-reasons ["card blocked"
                                                                                                                                "transaction above limit for first transaction"
                                                                                                                                "merchant in denylist"]}))
+
+(fact "A first transaction that is allow-listed but shouldn't be approved otherwise"
+      (logic/can-transaction-be-authorized? account-with-denylist-card-active-allow-listed transaction-above-90percent-limit []) => (just {:approved true
+                                                                                                                                           :new-limit (roughly 99.99)
+                                                                                                                                           :allow-listed true
+                                                                                                                                           :denied-reasons []}))
+
+(fact "A transaction that is allow-listed but shouldn't be approved otherwise, with card not blocked and transaction below limit"
+      (logic/can-transaction-be-authorized? account-with-denylist-card-active-allow-listed transaction last-transactions-merchant-limit) => (just {:approved true
+                                                                                                                                                   :new-limit 900.00
+                                                                                                                                                   :allow-listed true
+                                                                                                                                                   :denied-reasons []}))
+
+(fact "An allow-listed transaction worst case scenario (all denied reasons would be returned otherwise)"
+  (logic/can-transaction-be-authorized? account-with-denylist-allow-listed transaction-above-limit last-transactions-merchant-limit) => (just {:approved false
+                                                                                                                                  :new-limit 1000.00
+                                                                                                                                  :allow-listed true
+                                                                                                                                  :denied-reasons ["card blocked"
+                                                                                                                                                   "transaction above limit"]}))

@@ -11,9 +11,10 @@
 
 (def rate-limit-transactions 3)
 
-(defn transaction-authorization-output [approved new-limit denied-reasons]
+(defn transaction-authorization-output [approved new-limit denied-reasons allow-listed]
   {:approved approved
    :new-limit new-limit
+   :allow-listed allow-listed
    :denied-reasons denied-reasons})
 
 (defn eval-rule 
@@ -81,13 +82,20 @@
    ["merchant limit exceeded" is-above-merchant-threshold? (:merchant transaction) last-transactions]
    ["transaction rate limit exceeded" is-rate-limit-exceeded? last-transactions (:time transaction)]])
 
+(defn transaction-rules-allow-listed
+  "Returns an abridged list of rules and denied reasons for when an account is allow-listed"
+  [account transaction last-transactions]
+  [["card blocked" is-card-blocked? account]
+   ["transaction above limit" is-above-limit? account (:amount transaction)]])
+
 (defn can-transaction-be-authorized?
   "Checks if a transaction can be authorized by evaluating all rules from transaction-rules
   Returns the new limit, whether the transaction was approved and a list of reasons if the transaction was denied"
-  [account transaction last-transactions]
-  (let [amount (:amount transaction)
-        denied-reasons (remove nil? (map #(apply eval-rule %) (transaction-rules account transaction last-transactions)))
+  [{:keys [allow-listed limit] :as account} {:keys [amount] :as transaction} last-transactions]
+  (let [rules-to-use (if allow-listed transaction-rules-allow-listed transaction-rules)
+        denied-reasons (remove nil? (map #(apply eval-rule %) (rules-to-use account transaction last-transactions)))
         transaction-approved (empty? denied-reasons)]
     (transaction-authorization-output transaction-approved 
-                                      (if transaction-approved (calculate-new-limit account amount) (:limit account))
-                                      denied-reasons)))
+                                      (if transaction-approved (calculate-new-limit account amount) limit)
+                                      denied-reasons
+                                      allow-listed)))
